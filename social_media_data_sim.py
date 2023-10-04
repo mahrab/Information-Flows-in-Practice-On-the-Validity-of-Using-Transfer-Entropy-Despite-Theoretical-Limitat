@@ -22,6 +22,10 @@ def main(nodes, time_steps, probability, metric, in_dir, out_dir):
 	save_rankings(ranking, metric, out_dir, name="te_ranking.txt")
 	trees = extract_trees(te_graph, ranking)
 	save_trees(trees, ranking, metric, out_dir)
+	rank_correlation = extract_rank_correlation(ground_truth_ranking, ranking)[0][1]
+	print(rank_correlation)
+	graph_similarity = extract_graph_similarity(graph, te_graph)
+	print(graph_similarity)
 
 def initialize_ground_truth_graph(nodes, in_dir, source=0, path_weight=0.9):
 	g = nx.scale_free_graph(nodes, alpha=0.05, gamma=0.41)
@@ -151,5 +155,18 @@ def save_trees(trees, ranking, metric, out_dir):
 	for t in range(len(trees)):
 		save_graph(trees[t], out_dir, name="tree_rank_{}_root_{}_{}_centrality_{}.txt".format(t+1, ranking[t][1], metric, ranking[t][0]))
 
+def extract_rank_correlation(true_rankings, test_rankings):
+	true_rank_array = np.zeros(len(true_rankings))
+	for centrality, node in true_rankings:
+		true_rank_array[node] = centrality
+	test_rank_array = np.zeros(len(test_rankings))
+	for centrality, node in test_rankings:
+		test_rank_array[node] = centrality
+	rank_correlation = np.corrcoef(true_rank_array, test_rank_array)
+	return rank_correlation
+
+def extract_graph_similarity(true_graph, test_graph):
+	return nx.graph_edit_distance(true_graph, test_graph)
+
 if __name__ == '__main__':
-	main(nodes=20, time_steps=20, probability=0.50, metric='betweenness', in_dir='input', out_dir='output')
+	main(nodes=10, time_steps=20, probability=0.50, metric='betweenness', in_dir='input', out_dir='output')
