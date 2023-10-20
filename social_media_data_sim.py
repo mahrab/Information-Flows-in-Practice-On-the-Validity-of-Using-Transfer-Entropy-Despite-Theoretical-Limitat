@@ -34,6 +34,9 @@ def main():
 	rank_correlation = extract_rank_correlation(ground_truth_ranking, ranking)[0][1]
 	output["rank correlation"] = rank_correlation
 	print(rank_correlation)
+	similarity = extract_graph_similarity(graph, te_graph, args.timeout)
+	output["similarity"] = similarity
+	print(similarity)
 	save_output(output, args.out_dir)
 
 def initialize_parser():
@@ -48,6 +51,7 @@ def initialize_parser():
 	parser.add_argument('--metric', default="betweenness")
 	parser.add_argument('--pull_top', type=int, default=5)
 	parser.add_argument('--out_dir', default="output")
+	parser.add_argument('--timeout', type=int, default=1)
 	parser.add_argument('--scale_free_alpha', type=float, default=0.05)
 	parser.add_argument('--scale_free_beta', type=float, default=0.54)
 	parser.add_argument('--scale_free_gamma', type=float, default=0.41)
@@ -65,15 +69,18 @@ def initialize_parser():
 
 def initialize_ground_truth_graph(nodes, generator, seed, alpha, beta, gamma, source, path_weight):
 	# initialize a scale free graph of the desired size to map out the social interactions
+	'''
 	g = nx.scale_free_graph(nodes, alpha=alpha, beta=beta, gamma=gamma, seed=seed)
 	graph = nx.DiGraph(g)
 	graph.remove_edges_from(nx.selfloop_edges(graph))
 	# select a shortest path starting from the given source node
+	'''
+	graph = watts_strogatz_graph_wrapper(nodes, nodes*2, 0.5, seed, generator)
 	paths = nx.single_source_shortest_path(graph, source)
 	target = list(paths.keys())[-1]
 	path = paths[list(paths.keys())[-1]]
 	# set the weights of edges along the path to a high value to create a cascade of influence
-	path_edges = [(path[i-1], path[i]) for i in range(1,len(path))]
+	path_edges = [(path[i-1], path[i]) for i in range(1, len(path))]
 	for edge in graph.edges():
 		if edge in path_edges:
 			graph[edge[0]][edge[1]]['weight'] = path_weight
@@ -84,6 +91,23 @@ def initialize_ground_truth_graph(nodes, generator, seed, alpha, beta, gamma, so
 		graph.nodes[node]['Outbox'] = []
 		graph.nodes[node]['Higher Order'] = []
 	return graph
+
+def watts_strogatz_graph_wrapper(nodes, edges, probability, seed, generator):
+	# handle the boundary cases of tree graphs or dense graphs
+	if edges == nodes-1:
+		t = nx.from_prufer_sequence([generator.choice(range(nodes)) for i in range(nodes-2)])
+		return nx.DiGraph(t)
+	if edges == nodes**2:
+		g = nx.complete_graph(nodes)
+		return nx.DiGraph(g)
+	# obtain number of nearest neighbor connections from desired graph density
+	k = int(edges/nodes)
+	G = nx.watts_strogatz_graph(nodes, k, probability, seed)
+	# guarantee connectivity of G and convert it to a DiGraph
+	augmentation = list(nx.k_edge_augmentation(G, k=1))
+	G.add_edges_from(augmentation)
+	G = nx.DiGraph(G)
+	return G
 
 def add_higher_order_relationships(graph, generator, num_relationships, max_relationship_size, relationship_size_alpha, relationship_size_beta, max_exponent, exp_alpha, exp_beta):
 	if num_relationships > 0:
@@ -253,8 +277,16 @@ def extract_rank_correlation(true_rankings, test_rankings):
 	rank_correlation = np.corrcoef(true_rank_array, test_rank_array)
 	return rank_correlation
 
-def extract_graph_similarity(true_graph, test_graph):
-	return nx.graph_edit_distance(true_graph, test_graph)
+def extract_graph_similarity(true_graph, test_graph, timeout):
+	gen = nx.optimize_graph_edit_distance(true_graph, test_graph)
+	t = 0
+	for s in gen:
+		if t > timeout:
+			break
+		min_s = s
+		print(min_s)
+		t += 1
+	return min_s
 
 def save_output(output, outdir, name="output"):
 	with open(outdir+"/"+name+".json", "w") as f:
