@@ -319,7 +319,7 @@ def ex_max_weight(out_dir, min_rels, max_rels, min_nodes, max_nodes, trials, rew
 	out_dir = "output/test_2/max_path_weight"
 	max_path_weights = [0.1, 0.3, 0.5, 0.7, 0.9]
 	for max_path_weight in max_path_weights:
-		experiment(out_dir+"_"+str(max_path_weight), min_rels, max_rels, min_nodes, max_nodes, trials, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap)
+		experiment(out_dir+"_"+str(max_path_weight), min_rels, max_rels, min_nodes, max_nodes, trials, max_path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap)
 
 def ex_emission(out_dir, min_rels, max_rels, min_nodes, max_nodes, trials, path_weight, rewire_probability, max_relationship_size, time_steps, higher_order_sensitivity, inbox_cap):
 	out_dir = "output/test_2/emission_probability"
