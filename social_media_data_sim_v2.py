@@ -24,6 +24,7 @@ def main():
 	ex_rewire(
 		args.out_dir, args.min_relationships, args.max_relationships, args.min_nodes, args.max_nodes, args.trials, 
 		args.max_path_weight, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity, args.inbox_cap)
+	'''
 	ex_max_weight(
 		args.out_dir, args.min_relationships, args.max_relationships, args.min_nodes, args.max_nodes, args.trials, 
 		args.rewire_probability, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity, args.inbox_cap)
@@ -36,13 +37,16 @@ def main():
 	ex_inbox(
 		args.out_dir, args.min_relationships, args.max_relationships, args.min_nodes, args.max_nodes, args.trials, 
 		args.max_path_weight, args.rewire_probability, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity)
+	'''
 	print("Elapsed time = {} seconds".format(time.time() - start_time))
-	#sample_graphs(5, 10, args.max_path_weight, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity, args.inbox_cap, args.out_dir)
+	#sample_trial(
+	#	"sample_trial_test", 5, 10, 
+	#	args.max_path_weight, args.rewire_probability, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity, args.inbox_cap)
 
 def initialize_parser():
 	parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
 	
-	parser.add_argument('--out_dir', default="output/temp_test")
+	parser.add_argument('--out_dir', default="output/test_3")
 	parser.add_argument('--min_relationships', type=int, default=1)
 	parser.add_argument('--max_relationships', type=int, default=10)
 	parser.add_argument('--max_relationship_size', type=int, default=5)
@@ -198,6 +202,7 @@ def experiment(out_dir, min_rels, max_rels, min_nodes, max_nodes, trials, path_w
 			test_rank_correlation, control_rank_correlation = trial(rels, nodes, trials, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap)
 			test_rc_results[nodes] = test_rank_correlation
 			control_rc_results[nodes] = control_rank_correlation
+		sample_trial(out_dir+"/sample_trial_"+str(rels)+"_relationships", rels, 10, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap)
 
 		# save results
 		if not os.path.exists(out_dir):
@@ -205,7 +210,7 @@ def experiment(out_dir, min_rels, max_rels, min_nodes, max_nodes, trials, path_w
 		test_rc_results.to_json(path_or_buf=out_dir+"/"+str(rels)+"_relationships_test_rank_correlation.json")
 		control_rc_results.to_json(path_or_buf=out_dir+"/"+str(rels)+"_relationships_control_rank_correlation.json")
 
-		sample_time_series(out_dir, rels, max_nodes, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap)
+		#sample_time_series(out_dir, rels, max_nodes, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap)
 
 		test_means = test_rc_results.mean()
 		test_std_devs = test_rc_results.std()
@@ -219,7 +224,6 @@ def experiment(out_dir, min_rels, max_rels, min_nodes, max_nodes, trials, path_w
 		results = pd.DataFrame({"test means": test_means, "test std devs": test_std_devs, "control means": control_means, "control std devs": control_std_devs, "p values": p_values, "dfs": df})
 		results.to_csv(path_or_buf=out_dir+"/"+str(rels)+"_relationships_results.csv")
 		print(results)
-		#ex_results[rels] = p_values
 		ex_results_p_value[rels] = p_values
 		ex_results_test_mean[rels] = test_means
 		ex_results_test_std[rels] = test_std_devs
@@ -258,7 +262,7 @@ def trial(num_relationships, nodes, trials, path_weight, rewire_probability, max
 		control_rank_correlation[t] = control_correlation
 
 	return (test_rank_correlation, control_rank_correlation)
-
+'''
 def sample_time_series(out_dir, num_relationships, nodes, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap):
 	generator = np.random.default_rng()
 	g = Generate_Watts_Strogatz_Graph(generator, nodes, path_weight, rewire_probability)
@@ -294,9 +298,10 @@ def sample_graphs(num_relationships, nodes, path_weight, max_relationship_size, 
 		name = "sample_graph_TE_rw_"+str(int(10*rewire_probability))
 		title = "TE Network, rewire probability = "+str(rewire_probability)
 		save_graph(test_te, out_dir, name, title)
-
+'''
 def save_graph(g, out_dir, name, title):
-	print(g)
+	#print(g)
+	np.savetxt(out_dir+"/"+name+".txt", g, fmt='%.2e')
 	graph = nx.DiGraph(g)
 	pos = nx.spring_layout(graph)
 	nx.draw_networkx_nodes(graph, pos)
@@ -310,34 +315,85 @@ def save_graph(g, out_dir, name, title):
 	plt.close()
 
 def ex_rewire(out_dir, min_rels, max_rels, min_nodes, max_nodes, trials, path_weight, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap):
-	out_dir = "output/test_2/rewire_probability"
+	out_dir = out_dir+"/rewire_probability"
 	rewire_probabilities = [0.1, 0.3, 0.5, 0.7, 0.9]
 	for rewire_probability in rewire_probabilities:
 		experiment(out_dir+"_"+str(rewire_probability), min_rels, max_rels, min_nodes, max_nodes, trials, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap)
 
 def ex_max_weight(out_dir, min_rels, max_rels, min_nodes, max_nodes, trials, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap):
-	out_dir = "output/test_2/max_path_weight"
+	out_dir = out_dir+"/max_path_weight"
 	max_path_weights = [0.1, 0.3, 0.5, 0.7, 0.9]
 	for max_path_weight in max_path_weights:
 		experiment(out_dir+"_"+str(max_path_weight), min_rels, max_rels, min_nodes, max_nodes, trials, max_path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap)
 
 def ex_emission(out_dir, min_rels, max_rels, min_nodes, max_nodes, trials, path_weight, rewire_probability, max_relationship_size, time_steps, higher_order_sensitivity, inbox_cap):
-	out_dir = "output/test_2/emission_probability"
+	out_dir = out_dir+"/emission_probability"
 	emission_probabilities = [0.1, 0.3, 0.5, 0.7, 0.9]
 	for emission_probability in emission_probabilities:
 		experiment(out_dir+"_"+str(emission_probability), min_rels, max_rels, min_nodes, max_nodes, trials, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap)
 
 def ex_hos(out_dir, min_rels, max_rels, min_nodes, max_nodes, trials, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, inbox_cap):
-	out_dir = "output/test_2/higher_order_sensitivity"
+	out_dir = out_dir+"/higher_order_sensitivity"
 	higher_order_sensitivities = [0.1, 0.3, 0.5, 0.7, 0.9]
 	for higher_order_sensitivity in higher_order_sensitivities:
 		experiment(out_dir+"_"+str(higher_order_sensitivity), min_rels, max_rels, min_nodes, max_nodes, trials, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap)
 
 def ex_inbox(out_dir, min_rels, max_rels, min_nodes, max_nodes, trials, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity):
-	out_dir = "output/test_2/inbox_cap"
+	out_dir = out_dir+"/inbox_cap"
 	inbox_caps = [1, 3, 5, 7, 9]
 	for inbox_cap in inbox_caps:
 		experiment(out_dir+"_"+str(inbox_cap), min_rels, max_rels, min_nodes, max_nodes, trials, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap)
+
+def sample_trial(out_dir, num_relationships, nodes, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap):
+	if not os.path.exists(out_dir):
+		os.makedirs(out_dir)
+
+	generator = np.random.default_rng()
+	g = Generate_Watts_Strogatz_Graph(generator, nodes, path_weight, rewire_probability)
+	r = define_higher_order_relationships(generator, nodes, num_relationships, max_relationship_size)
+	true_ranking = extract_rankings(g, nodes)
+
+	name = "sample_graph_MAS"
+	title = "Multi Agent System"
+	save_graph(g, out_dir, name, title)
+
+	with open(out_dir+"/true_ranking.txt", "w") as f:
+		for entry in true_ranking:
+			f.write("Node "+str(entry[1])+": Katz Centrality = "+str(entry[0])+"\n")
+		
+	test_time_series = run_simuation(generator, g, r, nodes, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, True)
+	test_time_series = test_time_series > 0
+	test_te = calculate_transfer_entropy(test_time_series)
+	test_ranking = extract_rankings(test_te, nodes)
+	test_correlation = extract_rank_correlation(true_ranking, test_ranking)
+
+	np.savetxt(out_dir+"/test_time_series.txt", test_time_series, fmt='%.1f')
+
+	name = "sample_graph_TE_test"
+	title = "TE Network, With Higher Order Relationships"
+	save_graph(test_te, out_dir, name, title)
+
+	with open(out_dir+"/test_ranking.txt", "w") as f:
+		f.write("Rank Correlation = "+str(test_correlation)+"\n")
+		for entry in test_ranking:
+			f.write("Node "+str(entry[1])+": Katz Centrality = "+str(entry[0])+"\n")
+
+	control_time_series = run_simuation(generator, g, r, nodes, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, False)
+	control_time_series = control_time_series > 0
+	control_te = calculate_transfer_entropy(control_time_series)
+	control_ranking = extract_rankings(control_te, nodes)
+	control_correlation = extract_rank_correlation(true_ranking, control_ranking)
+
+	np.savetxt(out_dir+"/control_time_series.txt", control_time_series, fmt='%.1f')
+
+	name = "sample_graph_TE_control"
+	title = "TE Network, Without Higher Order Relationships"
+	save_graph(control_te, out_dir, name, title)
+
+	with open(out_dir+"/control_ranking.txt", "w") as f:
+		f.write("Rank Correlation = "+str(control_correlation)+"\n")
+		for entry in control_ranking:
+			f.write("Node "+str(entry[1])+": Katz Centrality = "+str(entry[0])+"\n")
 
 if __name__ == '__main__':
 	main()
