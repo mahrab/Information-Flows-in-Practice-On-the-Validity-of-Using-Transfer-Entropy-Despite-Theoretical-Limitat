@@ -157,7 +157,7 @@ def restore_connectivity(g):
 	return g
 
 #@njit
-def generate_tree_graph(generator, nodes, max_weight, branching_factor=1, scale_free=0):
+def generate_tree_graph(generator, nodes, max_weight, branching_factor=3, scale_free=0):
 	# initialize empty tree graph, and weights for later use
 	g = np.zeros((nodes, nodes))
 	w = generator.uniform(low=0.01, high=max_weight, size=(nodes, nodes))
@@ -501,20 +501,22 @@ def process_ex_results(ex_results_p_value, ex_results_df, ex_results_test_mean, 
 	return (m_ex_results_p_value, m_ex_results_test_mean, m_ex_results_control_mean, m_ex_results_test_path_mean, m_ex_results_control_path_mean)
 
 def experiment_v2(out_dir, trials, max_edge_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, tr):
-	gs = [10, 100, 1000]
+	gs = [10, 100, 200, 300, 400, 500]
 	r = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] 
 	if not os.path.exists(out_dir):
-			os.makedirs(out_dir)
+		os.makedirs(out_dir)
+
+	sample_trial(out_dir+"/sample_trial", 2, 10, max_edge_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, tr)
 
 	for graph_size in gs:
 		rels = int(graph_size/5)
-		mew_rank_corr_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
+		mew_rank_corr_results = pd.DataFrame(index=["TE Without Higher Order Relationships", "TE With Higher Order Relationships"], columns=r)
 		mew_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
 
-		hos_rank_corr_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
+		hos_rank_corr_results = pd.DataFrame(index=["TE Without Higher Order Relationships", "TE With Higher Order Relationships"], columns=r)
 		hos_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
 
-		thr_rank_corr_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
+		thr_rank_corr_results = pd.DataFrame(index=["TE Without Higher Order Relationships", "TE With Higher Order Relationships"], columns=r)
 		thr_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
 		for v in r:
 			print("Graph Size = {}, Parameter Value = {}".format(graph_size, v))
@@ -537,34 +539,34 @@ def experiment_v2(out_dir, trials, max_edge_weight, rewire_probability, max_rela
 			thr_path_results.loc["Without Higher Order Relationships", v] = np.mean(control_path)
 
 		mew_rank_corr_results.to_csv(path_or_buf=out_dir+"/Max_Edge_Weight_vs_Rank_Correlation__GS_"+str(graph_size)+".csv")	
-		f0 = mew_rank_corr_results.T.plot(title="Rank Correlation vs Maximum Edge Strength", ylabel="Average Rank Correlation", xlabel="Maximum Edge Weight")
+		f0 = mew_rank_corr_results.T.plot(title="Effect of Localizable Influence Signal Strength on Path Recovery", ylabel="Rank Correlation", xlabel="Localizable Influence Signal Strength")
 		plt.savefig(out_dir+"/Max_Edge_Weight_vs_Rank_Correlation__GS_"+str(graph_size)+".png")
 		plt.close()
 
-		mew_path_results.to_csv(path_or_buf=out_dir+"/Max_Edge_Weight_vs_Path_Recovery__GS_"+str(graph_size)+".csv")
-		f1 = mew_path_results.T.plot(title = "High Influence Path Recovery vs Maximum Edge Strength", ylabel="Average Path Recovery", xlabel="Maximum Edge Weight")
-		plt.savefig(out_dir+"/Max_Edge_Weight_vs_Path_Recovery__GS_"+str(graph_size)+".png")
-		plt.close()
+		#mew_path_results.to_csv(path_or_buf=out_dir+"/Max_Edge_Weight_vs_Path_Recovery__GS_"+str(graph_size)+".csv")
+		#f1 = mew_path_results.T.plot(title = "Effect of Localizable Influence Signal Strength on Path Recovery", ylabel="Path Recovery", xlabel="Localizable Influence Signal Strength")
+		#plt.savefig(out_dir+"/Max_Edge_Weight_vs_Path_Recovery__GS_"+str(graph_size)+".png")
+		#plt.close()
 
 		hos_rank_corr_results.to_csv(path_or_buf=out_dir+"/Higher_Order_Sensitivity_vs_Rank_Correlation__GS_"+str(graph_size)+".csv")
-		f2 = hos_rank_corr_results.T.plot(title="Rank Correlation vs Sensitivity to Higher Order Relationships", ylabel="Average Rank Correlation", xlabel="Sensitivity")
+		f2 = hos_rank_corr_results.T.plot(title="Effect of Higher Order Relationship Signal Strength on Rank Correlation", ylabel="Rank Correlation", xlabel="Higher Order Relationship Signal Strength")
 		plt.savefig(out_dir+"/Higher_Order_Sensitivity_vs_Rank_Correlation__GS_"+str(graph_size)+".png")
 		plt.close()
 		
-		hos_path_results.to_csv(path_or_buf=out_dir+"/Higher_Order_Sensitivity_vs_Path_Recovery__GS_"+str(graph_size)+".csv")
-		f3 = hos_path_results.T.plot(title = "High Influence Path Recovery vs Sensitivity to Higher Order Relationships", ylabel="Average Path Recovery", xlabel="Sensitivity")
-		plt.savefig(out_dir+"/Higher_Order_Sensitivity_vs_Path_Recovery__GS_"+str(graph_size)+".png")
-		plt.close()
+		#hos_path_results.to_csv(path_or_buf=out_dir+"/Higher_Order_Sensitivity_vs_Path_Recovery__GS_"+str(graph_size)+".csv")
+		#f3 = hos_path_results.T.plot(title = "Effect of Higher Order Relationship Signal Strength on Path Recovery", ylabel="Average Path Recovery", xlabel="Higher Order Relationship Signal Strength")
+		#plt.savefig(out_dir+"/Higher_Order_Sensitivity_vs_Path_Recovery__GS_"+str(graph_size)+".png")
+		#plt.close()
 
 		thr_rank_corr_results.to_csv(path_or_buf=out_dir+"/Threshold_vs_Rank_Correlation__GS_"+str(graph_size)+".csv")
-		f4 = thr_rank_corr_results.T.plot(title="Rank Correlation vs Transfer Entropy Network Filtering Threshold", ylabel="Average Rank Correlation", xlabel="Threshold")
+		f4 = thr_rank_corr_results.T.plot(title="Effect of TE Filtering Threshold on Rank Correlation W/ Ground Truth", ylabel="Average Rank Correlation", xlabel="TE Filtering Threshold (std devs below mean)")
 		plt.savefig(out_dir+"/Threshold_vs_Rank_Correlation__GS_"+str(graph_size)+".png")
 		plt.close()
 
-		thr_path_results.to_csv(path_or_buf=out_dir+"/Threshold_vs_Path Recovery__GS_"+str(graph_size)+".csv")
-		f5 = thr_path_results.T.plot(title = "High Influence Path Recovery vs Transfer Entropy Network Filtering Threshold", ylabel="Average Path Recovery", xlabel="Threshold")
-		plt.savefig(out_dir+"/Threshold_vs_Path_Recovery__GS_"+str(graph_size)+".png")
-		plt.close()
+		#thr_path_results.to_csv(path_or_buf=out_dir+"/Effect of TE Filtering Threshold_on_Path Recovery__GS_"+str(graph_size)+".csv")
+		#f5 = thr_path_results.T.plot(title = "Effect of TE Filtering Threshold on Path Recovery", ylabel="Average Path Recovery", xlabel="TE Filtering Threshold (std devs below mean)")
+		#plt.savefig(out_dir+"/Threshold_vs_Path_Recovery__GS_"+str(graph_size)+".png")
+		#plt.close()
 
 if __name__ == '__main__':
 	main()
