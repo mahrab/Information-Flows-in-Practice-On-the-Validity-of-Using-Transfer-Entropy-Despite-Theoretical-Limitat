@@ -18,7 +18,7 @@ def main():
 	args = parser.parse_args()
 
 	start_time = time.time()
-
+	'''
 	r = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] 
 
 	mew_rank_corr_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
@@ -75,6 +75,7 @@ def main():
 	f5 = thr_path_results.T.plot(title = "Percentage of High Influence Path Recovered vs Transfer Entropy Network Filtering Threshold", ylabel="Average Path Recovery", xlabel="Threshold")
 	plt.savefig(args.out_dir+"/f5.png")
 	plt.close()
+	'''
 	# l = list(product(range(len(series)),repeat=2)) # saving this snippet of code for later use
 
 	'''
@@ -82,13 +83,16 @@ def main():
 		args.out_dir, args.min_relationships, args.max_relationships, args.min_nodes, args.max_nodes, args.trials, 
 		args.max_path_weight, args.rewire_probability, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity, args.inbox_cap, args.tr)
 	'''
+
+	experiment_v2(args.out_dir, args.trials, args.max_path_weight, args.rewire_probability, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity, args.inbox_cap, args.tr)
+	
 	print("Elapsed time = {} seconds".format(time.time() - start_time))
 
 
 def initialize_parser():
 	parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
 	
-	parser.add_argument('--out_dir', default="output/test_trees_8")
+	parser.add_argument('--out_dir', default="output/test_trees_9")
 	parser.add_argument('--min_relationships', type=int, default=1)
 	parser.add_argument('--max_relationships', type=int, default=10)
 	parser.add_argument('--max_relationship_size', type=int, default=5)
@@ -486,10 +490,7 @@ def sample_trial(out_dir, num_relationships, nodes, path_weight, rewire_probabil
 		for entry in control_ranking:
 			f.write("Node "+str(entry[1])+": Katz Centrality = "+str(entry[0])+"\n")
 
-def process_ex_results(
-	ex_results_p_value, ex_results_df, 
-	ex_results_test_mean, ex_results_control_mean, ex_results_test_std, ex_results_control_std,
-	ex_results_test_path_mean, ex_results_control_path_mean, ex_results_test_path_std, ex_results_control_path_std):
+def process_ex_results(ex_results_p_value, ex_results_df, ex_results_test_mean, ex_results_control_mean, ex_results_test_std, ex_results_control_std, ex_results_test_path_mean, ex_results_control_path_mean, ex_results_test_path_std, ex_results_control_path_std):
 
 	m_ex_results_p_value = ex_results_p_value.mean(axis=None)
 	m_ex_results_test_mean = ex_results_test_mean.mean(axis=None)
@@ -498,6 +499,72 @@ def process_ex_results(
 	m_ex_results_control_path_mean = ex_results_control_path_mean.mean(axis=None)
 
 	return (m_ex_results_p_value, m_ex_results_test_mean, m_ex_results_control_mean, m_ex_results_test_path_mean, m_ex_results_control_path_mean)
+
+def experiment_v2(out_dir, trials, max_edge_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, tr):
+	gs = [10, 100, 1000]
+	r = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] 
+	if not os.path.exists(out_dir):
+			os.makedirs(out_dir)
+
+	for graph_size in gs:
+		rels = int(graph_size/5)
+		mew_rank_corr_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
+		mew_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
+
+		hos_rank_corr_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
+		hos_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
+
+		thr_rank_corr_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
+		thr_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
+		for v in r:
+			print("Graph Size = {}, Parameter Value = {}".format(graph_size, v))
+			test_rank_correlation, test_path, control_rank_correlation, control_path = trial(rels, graph_size, trials, v, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, tr)
+			mew_rank_corr_results.loc["With Higher Order Relationships", v] = np.mean(test_rank_correlation)
+			mew_rank_corr_results.loc["Without Higher Order Relationships", v] = np.mean(control_rank_correlation)
+			mew_path_results.loc["With Higher Order Relationships",v] = np.mean(test_path)
+			mew_path_results.loc["Without Higher Order Relationships", v] = np.mean(control_path)
+
+			test_rank_correlation, test_path, control_rank_correlation, control_path = trial(rels, graph_size, trials, max_edge_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, v, inbox_cap, tr)
+			hos_rank_corr_results.loc["With Higher Order Relationships", v] = np.mean(test_rank_correlation)
+			hos_rank_corr_results.loc["Without Higher Order Relationships", v] = np.mean(control_rank_correlation)
+			hos_path_results.loc["With Higher Order Relationships",v] = np.mean(test_path)
+			hos_path_results.loc["Without Higher Order Relationships", v] = np.mean(control_path)
+
+			test_rank_correlation, test_path, control_rank_correlation, control_path = trial(rels, graph_size, trials, max_edge_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, v)
+			thr_rank_corr_results.loc["With Higher Order Relationships", v] = np.mean(test_rank_correlation)
+			thr_rank_corr_results.loc["Without Higher Order Relationships", v] = np.mean(control_rank_correlation)
+			thr_path_results.loc["With Higher Order Relationships",v] = np.mean(test_path)
+			thr_path_results.loc["Without Higher Order Relationships", v] = np.mean(control_path)
+
+		mew_rank_corr_results.to_csv(path_or_buf=out_dir+"/Max_Edge_Weight_vs_Rank_Correlation__GS_"+str(graph_size)+".csv")	
+		f0 = mew_rank_corr_results.T.plot(title="Rank Correlation vs Maximum Edge Strength", ylabel="Average Rank Correlation", xlabel="Maximum Edge Weight")
+		plt.savefig(out_dir+"/Max_Edge_Weight_vs_Rank_Correlation__GS_"+str(graph_size)+".png")
+		plt.close()
+
+		mew_path_results.to_csv(path_or_buf=out_dir+"/Max_Edge_Weight_vs_Path_Recovery__GS_"+str(graph_size)+".csv")
+		f1 = mew_path_results.T.plot(title = "High Influence Path Recovery vs Maximum Edge Strength", ylabel="Average Path Recovery", xlabel="Maximum Edge Weight")
+		plt.savefig(out_dir+"/Max_Edge_Weight_vs_Path_Recovery__GS_"+str(graph_size)+".png")
+		plt.close()
+
+		hos_rank_corr_results.to_csv(path_or_buf=out_dir+"/Higher_Order_Sensitivity_vs_Rank_Correlation__GS_"+str(graph_size)+".csv")
+		f2 = hos_rank_corr_results.T.plot(title="Rank Correlation vs Sensitivity to Higher Order Relationships", ylabel="Average Rank Correlation", xlabel="Sensitivity")
+		plt.savefig(out_dir+"/Higher_Order_Sensitivity_vs_Rank_Correlation__GS_"+str(graph_size)+".png")
+		plt.close()
+		
+		hos_path_results.to_csv(path_or_buf=out_dir+"/Higher_Order_Sensitivity_vs_Path_Recovery__GS_"+str(graph_size)+".csv")
+		f3 = hos_path_results.T.plot(title = "High Influence Path Recovery vs Sensitivity to Higher Order Relationships", ylabel="Average Path Recovery", xlabel="Sensitivity")
+		plt.savefig(out_dir+"/Higher_Order_Sensitivity_vs_Path_Recovery__GS_"+str(graph_size)+".png")
+		plt.close()
+
+		thr_rank_corr_results.to_csv(path_or_buf=out_dir+"/Threshold_vs_Rank_Correlation__GS_"+str(graph_size)+".csv")
+		f4 = thr_rank_corr_results.T.plot(title="Rank Correlation vs Transfer Entropy Network Filtering Threshold", ylabel="Average Rank Correlation", xlabel="Threshold")
+		plt.savefig(out_dir+"/Threshold_vs_Rank_Correlation__GS_"+str(graph_size)+".png")
+		plt.close()
+
+		thr_path_results.to_csv(path_or_buf=out_dir+"/Threshold_vs_Path Recovery__GS_"+str(graph_size)+".csv")
+		f5 = thr_path_results.T.plot(title = "High Influence Path Recovery vs Transfer Entropy Network Filtering Threshold", ylabel="Average Path Recovery", xlabel="Threshold")
+		plt.savefig(out_dir+"/Threshold_vs_Path_Recovery__GS_"+str(graph_size)+".png")
+		plt.close()
 
 if __name__ == '__main__':
 	main()
