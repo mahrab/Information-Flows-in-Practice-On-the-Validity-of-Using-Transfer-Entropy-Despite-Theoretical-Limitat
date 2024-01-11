@@ -50,9 +50,9 @@ def main():
 		m2 = experiment(
 			args.out_dir+"/TE_filter_threshold_"+str(int(v*10)), args.min_relationships, args.max_relationships, args.min_nodes, args.max_nodes, args.trials, 
 			args.max_path_weight, args.rewire_probability, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity, args.inbox_cap, v)
-		thr_rank_corr_results.loc["With Higher Order Relationships", v] = m3[1]
-		thr_rank_corr_results.loc["Without Higher Order Relationships", v] = m3[2]
-		thr_path_results.loc["With Higher Order Relationships",v] = m3[3]
+		thr_rank_corr_results.loc["With Higher Order Relationships", v] = m2[1]
+		thr_rank_corr_results.loc["Without Higher Order Relationships", v] = m2[2]
+		thr_path_results.loc["With Higher Order Relationships",v] = m2[3]
 		thr_path_results.loc["Without Higher Order Relationships", v] = m2[4]
 
 	f0 = mew_rank_corr_results.T.plot(title="Rank Correlation vs Maximum Edge Strength", ylabel="Average Rank Correlation", xlabel="Maximum Edge Weight")
