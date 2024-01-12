@@ -98,7 +98,7 @@ def initialize_parser():
 	parser.add_argument('--max_relationship_size', type=int, default=5)
 	parser.add_argument('--min_nodes', type=int, default=10)
 	parser.add_argument('--max_nodes', type=int, default=50)
-	parser.add_argument('--trials', type=int, default=50)
+	parser.add_argument('--trials', type=int, default=100)
 
 	parser.add_argument('--time_steps', type=int, default=200) # 200
 	parser.add_argument('--inbox_cap', type=int, default=5) # 5
@@ -157,7 +157,7 @@ def restore_connectivity(g):
 	return g
 
 #@njit
-def generate_tree_graph(generator, nodes, max_weight, branching_factor=3, scale_free=0):
+def generate_tree_graph(generator, nodes, max_weight, branching_factor=1, scale_free=0):
 	# initialize empty tree graph, and weights for later use
 	g = np.zeros((nodes, nodes))
 	w = generator.uniform(low=0.01, high=max_weight, size=(nodes, nodes))
@@ -188,7 +188,7 @@ def generate_tree_graph(generator, nodes, max_weight, branching_factor=3, scale_
 	pos = 0
 	while np.sum(g[pos]) > 0:
 		child = generator.permutation(g[pos].nonzero()[0])[0]
-		g[pos][child] = 0.9
+		g[pos][child] = max_weight #0.9
 		pos = child
 		path.append(child)
 
@@ -521,25 +521,25 @@ def experiment_v2(out_dir, trials, max_edge_weight, rewire_probability, max_rela
 		for v in r:
 			print("Graph Size = {}, Parameter Value = {}".format(graph_size, v))
 			test_rank_correlation, test_path, control_rank_correlation, control_path = trial(rels, graph_size, trials, v, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, tr)
-			mew_rank_corr_results.loc["With Higher Order Relationships", v] = np.mean(test_rank_correlation)
-			mew_rank_corr_results.loc["Without Higher Order Relationships", v] = np.mean(control_rank_correlation)
-			mew_path_results.loc["With Higher Order Relationships",v] = np.mean(test_path)
-			mew_path_results.loc["Without Higher Order Relationships", v] = np.mean(control_path)
+			mew_rank_corr_results.loc["TE With Higher Order Relationships", v] = np.mean(test_rank_correlation)
+			mew_rank_corr_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_rank_correlation)
+			mew_path_results.loc["TE With Higher Order Relationships",v] = np.mean(test_path)
+			mew_path_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_path)
 
 			test_rank_correlation, test_path, control_rank_correlation, control_path = trial(rels, graph_size, trials, max_edge_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, v, inbox_cap, tr)
-			hos_rank_corr_results.loc["With Higher Order Relationships", v] = np.mean(test_rank_correlation)
-			hos_rank_corr_results.loc["Without Higher Order Relationships", v] = np.mean(control_rank_correlation)
-			hos_path_results.loc["With Higher Order Relationships",v] = np.mean(test_path)
-			hos_path_results.loc["Without Higher Order Relationships", v] = np.mean(control_path)
+			hos_rank_corr_results.loc["TE With Higher Order Relationships", v] = np.mean(test_rank_correlation)
+			hos_rank_corr_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_rank_correlation)
+			hos_path_results.loc["TE With Higher Order Relationships",v] = np.mean(test_path)
+			hos_path_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_path)
 
 			test_rank_correlation, test_path, control_rank_correlation, control_path = trial(rels, graph_size, trials, max_edge_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, v)
-			thr_rank_corr_results.loc["With Higher Order Relationships", v] = np.mean(test_rank_correlation)
-			thr_rank_corr_results.loc["Without Higher Order Relationships", v] = np.mean(control_rank_correlation)
-			thr_path_results.loc["With Higher Order Relationships",v] = np.mean(test_path)
-			thr_path_results.loc["Without Higher Order Relationships", v] = np.mean(control_path)
+			thr_rank_corr_results.loc["TE With Higher Order Relationships", v] = np.mean(test_rank_correlation)
+			thr_rank_corr_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_rank_correlation)
+			thr_path_results.loc["TE With Higher Order Relationships",v] = np.mean(test_path)
+			thr_path_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_path)
 
 		mew_rank_corr_results.to_csv(path_or_buf=out_dir+"/Max_Edge_Weight_vs_Rank_Correlation__GS_"+str(graph_size)+".csv")	
-		f0 = mew_rank_corr_results.T.plot(title="Effect of Localizable Influence Signal Strength on Path Recovery", ylabel="Rank Correlation", xlabel="Localizable Influence Signal Strength")
+		f0 = mew_rank_corr_results.T.plot(title="Effect of Localizable Signal Strength on Rank Correlation, "+str(graph_size)+" Nodes", ylabel="Rank Correlation", xlabel="Localizable Influence Signal Strength")
 		plt.savefig(out_dir+"/Max_Edge_Weight_vs_Rank_Correlation__GS_"+str(graph_size)+".png")
 		plt.close()
 
@@ -549,7 +549,7 @@ def experiment_v2(out_dir, trials, max_edge_weight, rewire_probability, max_rela
 		#plt.close()
 
 		hos_rank_corr_results.to_csv(path_or_buf=out_dir+"/Higher_Order_Sensitivity_vs_Rank_Correlation__GS_"+str(graph_size)+".csv")
-		f2 = hos_rank_corr_results.T.plot(title="Effect of Higher Order Relationship Signal Strength on Rank Correlation", ylabel="Rank Correlation", xlabel="Higher Order Relationship Signal Strength")
+		f2 = hos_rank_corr_results.T.plot(title="Effect of Higher Order Signal Strength on Rank Correlation, "+str(graph_size)+" Nodes", ylabel="Rank Correlation", xlabel="Higher Order Relationship Signal Strength")
 		plt.savefig(out_dir+"/Higher_Order_Sensitivity_vs_Rank_Correlation__GS_"+str(graph_size)+".png")
 		plt.close()
 		
@@ -559,7 +559,7 @@ def experiment_v2(out_dir, trials, max_edge_weight, rewire_probability, max_rela
 		#plt.close()
 
 		thr_rank_corr_results.to_csv(path_or_buf=out_dir+"/Threshold_vs_Rank_Correlation__GS_"+str(graph_size)+".csv")
-		f4 = thr_rank_corr_results.T.plot(title="Effect of TE Filtering Threshold on Rank Correlation W/ Ground Truth", ylabel="Average Rank Correlation", xlabel="TE Filtering Threshold (std devs below mean)")
+		f4 = thr_rank_corr_results.T.plot(title="Effect of TE Filtering Threshold on Rank Correlation, "+str(graph_size)+" Nodes", ylabel="Rank Correlation", xlabel="TE Filtering Threshold (std devs below mean)")
 		plt.savefig(out_dir+"/Threshold_vs_Rank_Correlation__GS_"+str(graph_size)+".png")
 		plt.close()
 
