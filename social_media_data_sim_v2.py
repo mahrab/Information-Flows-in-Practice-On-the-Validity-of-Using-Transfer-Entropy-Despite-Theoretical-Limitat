@@ -18,95 +18,29 @@ def main():
 	args = parser.parse_args()
 
 	start_time = time.time()
-	'''
-	r = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] 
 
-	mew_rank_corr_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
-	mew_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
-
-	hos_rank_corr_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
-	hos_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
-
-	thr_rank_corr_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
-	thr_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
-
-	for v in r:
-		m0 = experiment(
-			args.out_dir+"/max_edge_weight_"+str(int(v*10)), args.min_relationships, args.max_relationships, args.min_nodes, args.max_nodes, args.trials, 
-			v, args.rewire_probability, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity, args.inbox_cap, args.tr)
-		mew_rank_corr_results.loc["With Higher Order Relationships", v] = m0[1]
-		mew_rank_corr_results.loc["Without Higher Order Relationships", v] = m0[2]
-		mew_path_results.loc["With Higher Order Relationships",v] = m0[3]
-		mew_path_results.loc["Without Higher Order Relationships", v] = m0[4]
-		
-		m1 = experiment(
-			args.out_dir+"/higher_order_sensitivity_"+str(int(v*10)), args.min_relationships, args.max_relationships, args.min_nodes, args.max_nodes, args.trials, 
-			args.max_path_weight, args.rewire_probability, args.max_relationship_size, args.time_steps, args.emission_probability, v, args.inbox_cap, args.tr)
-		hos_rank_corr_results.loc["With Higher Order Relationships", v] = m1[1]
-		hos_rank_corr_results.loc["Without Higher Order Relationships", v] = m1[2]
-		hos_path_results.loc["With Higher Order Relationships",v] = m1[3]
-		hos_path_results.loc["Without Higher Order Relationships", v] = m1[4]
-
-		m2 = experiment(
-			args.out_dir+"/TE_filter_threshold_"+str(int(v*10)), args.min_relationships, args.max_relationships, args.min_nodes, args.max_nodes, args.trials, 
-			args.max_path_weight, args.rewire_probability, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity, args.inbox_cap, v)
-		thr_rank_corr_results.loc["With Higher Order Relationships", v] = m2[1]
-		thr_rank_corr_results.loc["Without Higher Order Relationships", v] = m2[2]
-		thr_path_results.loc["With Higher Order Relationships",v] = m2[3]
-		thr_path_results.loc["Without Higher Order Relationships", v] = m2[4]
-
-	f0 = mew_rank_corr_results.T.plot(title="Rank Correlation vs Maximum Edge Strength", ylabel="Average Rank Correlation", xlabel="Maximum Edge Weight")
-	plt.savefig(args.out_dir+"/f0.png")
-	plt.close()
-	f1 = mew_path_results.T.plot(title = "Percentage of High Influence Path Recovered vs Maximum Edge Strength", ylabel="Average Path Recovery", xlabel="Maximum Edge Weight")
-	plt.savefig(args.out_dir+"/f1.png")
-	plt.close()
-
-	f2 = hos_rank_corr_results.T.plot(title="Rank Correlation vs Sensitivity to Higher Order Relationships", ylabel="Average Rank Correlation", xlabel="Sensitivity")
-	plt.savefig(args.out_dir+"/f2.png")
-	plt.close()
-	f3 = hos_path_results.T.plot(title = "Percentage of High Influence Path Recovered vs Sensitivity to Higher Order Relationships", ylabel="Average Path Recovery", xlabel="Sensitivity")
-	plt.savefig(args.out_dir+"/f3.png")
-	plt.close()
-
-	f4 = thr_rank_corr_results.T.plot(title="Rank Correlation vs Transfer Entropy Network Filtering Threshold", ylabel="Average Rank Correlation", xlabel="Threshold")
-	plt.savefig(args.out_dir+"/f4.png")
-	plt.close()
-	f5 = thr_path_results.T.plot(title = "Percentage of High Influence Path Recovered vs Transfer Entropy Network Filtering Threshold", ylabel="Average Path Recovery", xlabel="Threshold")
-	plt.savefig(args.out_dir+"/f5.png")
-	plt.close()
-	'''
-	# l = list(product(range(len(series)),repeat=2)) # saving this snippet of code for later use
-
-	'''
-	experiment(
-		args.out_dir, args.min_relationships, args.max_relationships, args.min_nodes, args.max_nodes, args.trials, 
-		args.max_path_weight, args.rewire_probability, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity, args.inbox_cap, args.tr)
-	'''
-
-	experiment_v2(args.out_dir, args.trials, args.max_path_weight, args.rewire_probability, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity, args.inbox_cap, args.tr)
-	
+	experiment_v3(args.out_dir, args.trials, args.max_path_weight, args.rewire_probability, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity, args.inbox_cap, args.tr)
+	#trial(2, 10, args.trials, args.max_path_weight, args.rewire_probability, args.max_relationship_size, args.time_steps, args.emission_probability, args.higher_order_sensitivity, args.inbox_cap, args.tr)
 	print("Elapsed time = {} seconds".format(time.time() - start_time))
-
 
 def initialize_parser():
 	parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
 	
-	parser.add_argument('--out_dir', default="output/test_trees_9")
+	parser.add_argument('--out_dir', default="output/test_trees_10")
 	parser.add_argument('--min_relationships', type=int, default=1)
 	parser.add_argument('--max_relationships', type=int, default=10)
-	parser.add_argument('--max_relationship_size', type=int, default=5)
+	parser.add_argument('--max_relationship_size', type=int, default=2)
 	parser.add_argument('--min_nodes', type=int, default=10)
 	parser.add_argument('--max_nodes', type=int, default=50)
-	parser.add_argument('--trials', type=int, default=100)
+	parser.add_argument('--trials', type=int, default=50) # 50
 
-	parser.add_argument('--time_steps', type=int, default=200) # 200
+	parser.add_argument('--time_steps', type=int, default=20) # 200
 	parser.add_argument('--inbox_cap', type=int, default=5) # 5
-	parser.add_argument('--emission_probability', type=float, default=0.5) # 0.5
+	parser.add_argument('--emission_probability', type=float, default=0.3) # 0.5
 	parser.add_argument('--higher_order_sensitivity', type=float, default=0.5) # 0.5
 	parser.add_argument('--max_path_weight', type=float, default=0.5) # 0.8
 	parser.add_argument('--rewire_probability', type=float, default=0.3) # 0.3
-	parser.add_argument('--tr', type=float, default=0.5) # 0.5
+	parser.add_argument('--tr', type=float, default=1.0) # 0.5
 
 	return parser
 
@@ -116,7 +50,6 @@ def Generate_Watts_Strogatz_Graph(generator, nodes, path_weight, rewire_probabil
 	g = restore_connectivity(g)
 	return g*w
 
-#@njit
 def initialize_ring_lattice(generator, nodes, path_weight):
 	# initialize empty graph, and weights for later use
 	g = np.zeros((nodes, nodes))
@@ -127,7 +60,6 @@ def initialize_ring_lattice(generator, nodes, path_weight):
 		g[n][n-1] = 1.0
 	return g, w
 
-#@njit
 def rewire_edges(generator, g, rewire_probability):
 	# extract edges and temporarily set diagonal entries to 1
 	e_r, e_c = g.nonzero()
@@ -156,7 +88,6 @@ def restore_connectivity(g):
 		l = shortest_path(g, indices=0)
 	return g
 
-#@njit
 def generate_tree_graph(generator, nodes, max_weight, branching_factor=1, scale_free=0):
 	# initialize empty tree graph, and weights for later use
 	g = np.zeros((nodes, nodes))
@@ -188,7 +119,7 @@ def generate_tree_graph(generator, nodes, max_weight, branching_factor=1, scale_
 	pos = 0
 	while np.sum(g[pos]) > 0:
 		child = generator.permutation(g[pos].nonzero()[0])[0]
-		g[pos][child] = max_weight #0.9
+		g[pos][child] = 0.9 #max_weight #0.9
 		pos = child
 		path.append(child)
 
@@ -196,7 +127,8 @@ def generate_tree_graph(generator, nodes, max_weight, branching_factor=1, scale_
 	# return g
 	return g, path
 
-def define_higher_order_relationships(generator, nodes, num_relationships, max_relationship_size):
+def define_higher_order_relationships(generator, nodes, num_relationships, relationship_size):
+	'''
 	# initialize a dict representing the set of relationships
 	relationships = {}
 	for n in range(nodes):
@@ -216,8 +148,13 @@ def define_higher_order_relationships(generator, nodes, num_relationships, max_r
 		# add the new higher order relationship to the dict
 		relationships[relationship_targets[i]].append(relationship)
 	return relationships
+	'''
+	relationship_targets = generator.choice(range(nodes), replace=False, size=num_relationships)
+	relationship_participants = generator.choice([i for i in range(nodes) if i not in relationship_targets], replace=False, size=(num_relationships, relationship_size))
+	return(relationship_targets.copy(), relationship_participants.copy())
 
 def run_simuation(generator, graph, higher_order_relationships, nodes, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, consider_higher_order):
+	'''
 	# initialize the message history of each node, with the unsolicited messages at each time step
 	outboxes = generator.binomial(1, emission_probability, size=(nodes,time_steps))
 	# for the following timesteps, populate the message history with response messages and messages induced by higher order relationships
@@ -231,7 +168,30 @@ def run_simuation(generator, graph, higher_order_relationships, nodes, time_step
 			# messages induced by the influence of higher order relationships
 			outboxes[node][t] += consider_higher_order * send_higher_order_response_message(generator, higher_order_relationships[node], outboxes[:,t-1], higher_order_sensitivity, inbox_cap)
 	return outboxes
-
+	'''
+	parents = graph.transpose()
+	unsolicited = generator.binomial(1, emission_probability, size=(nodes,time_steps))*1.0
+	response = np.zeros((nodes,time_steps))
+	higher_order = np.zeros((nodes,time_steps))
+	for t in range(1, time_steps):
+		for child in range(nodes):
+			for parent in parents[child].nonzero()[0]:
+				#print("parent = {}, child = {}, weight = {}, incoming message = {}".format(parent, child, parents[child][parent], unsolicited[parent][t-1] + response[parent][t-1]))
+				weight = parents[child][parent]
+				incoming_message = unsolicited[parent][t-1] + response[parent][t-1]
+				response[child][t] += incoming_message * weight
+		if consider_higher_order:
+			for i in range(len(higher_order_relationships[0])):
+				target = higher_order_relationships[0][i]
+				participants = higher_order_relationships[1][i]
+				contributions = [
+					max(unsolicited[participants[0]][t-1] + response[participants[0]][t-1] + higher_order[participants[0]][t-1], 0.1), 
+					max(unsolicited[participants[1]][t-1] + response[participants[1]][t-1] + higher_order[participants[1]][t-1], 0.1)]
+				geo_mean = np.prod(contributions[0] * contributions[1])**(0.5)
+				higher_order[target][t] += geo_mean
+	outboxes = unsolicited + response + higher_order
+	return(outboxes.copy())
+'''
 def send_higher_order_response_message(generator, relationships, incoming_messages, higher_order_sensitivity, inbox_cap):
 	higher_order_contribution = 0
 	# for each higher order relationship, take the geometric mean of the contributing nodes's messages in the previous time step
@@ -242,15 +202,14 @@ def send_higher_order_response_message(generator, relationships, incoming_messag
 		higher_order_contribution += geo_mean
 	# a 1 corresponds to sending a message of interest, a 0 corresponds to not sending a message of interest
 	return generator.binomial(min(int(higher_order_contribution), inbox_cap), higher_order_sensitivity)
-
+'''
 def calculate_transfer_entropy(series, tr, history_length=1):
 	# calculate the transfer entropy between each pair of time series
+	start_time = time.time()
 	l = list(product(range(len(series)),repeat=2))
-	#te_values_list = [pyinform.transfer_entropy(series[source], series[target], history_length, condition=[series[i] for i in range(len(series)) if (i!=source and i!=target)]) for source, target in l]
 	te_values_list = [pyinform.transfer_entropy(series[source], series[target], history_length) for source, target in l]
 	# use the transfer entropy values as edge weights to construct an adjacency matrix for a directed graph
 	te_graph = np.array(te_values_list).reshape((len(series),len(series)))
-	#threshold = np.mean(te_graph)
 	m = np.mean(te_graph)
 	s = np.std(te_graph)
 	threshold = m - tr*s
@@ -380,40 +339,39 @@ def experiment(out_dir, min_rels, max_rels, min_nodes, max_nodes, trials, path_w
 
 def trial(num_relationships, nodes, trials, path_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, tr):
 	test_rank_correlation = np.zeros(trials)
-	test_path_detection = np.zeros(trials) # testing this
+	#test_path_detection = np.zeros(trials)
 	control_rank_correlation = np.zeros(trials)
-	control_path_detection = np.zeros(trials) # testing this
+	#control_path_detection = np.zeros(trials)
 
 	for t in range(trials):
 		generator = np.random.default_rng()
 		#g = Generate_Watts_Strogatz_Graph(generator, nodes, path_weight, rewire_probability)
-		#g = generate_tree_graph(generator, nodes, path_weight)
 		g, path = generate_tree_graph(generator, nodes, path_weight)
 		r = define_higher_order_relationships(generator, nodes, num_relationships, max_relationship_size)
-		true_ranking = extract_rankings(g, nodes)
+		true_ranking = extract_rankings(g.copy(), nodes)
 		
-		test_time_series = run_simuation(generator, g, r, nodes, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, True)
-		test_time_series = test_time_series > 0
-		test_te = calculate_transfer_entropy(test_time_series, tr)
-		test_te = extract_TE_trees(test_te) # testing this
-		test_path_presence = check_path(test_te, path.copy()) # testing this
-		test_ranking = extract_rankings(test_te, nodes)
-		test_correlation = extract_rank_correlation(true_ranking, test_ranking)
+		test_time_series = run_simuation(generator, g.copy(), r, nodes, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, True)
+		bin_test_time_series = test_time_series > 0
+		test_te = calculate_transfer_entropy(bin_test_time_series.copy(), tr)
+		#test_te = extract_TE_trees(test_te)
+		#test_path_presence = check_path(test_te, path.copy())
+		test_ranking = extract_rankings(test_te.copy(), nodes)
+		test_correlation = extract_rank_correlation(true_ranking.copy(), test_ranking.copy())
 		test_rank_correlation[t] = test_correlation
-		test_path_detection[t] = test_path_presence # testing this
+		#test_path_detection[t] = test_path_presence
 
-		control_time_series = run_simuation(generator, g, r, nodes, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, False)
-		control_time_series = control_time_series > 0
-		control_te = calculate_transfer_entropy(control_time_series, tr)
-		control_te = extract_TE_trees(control_te) # testing this
-		control_path_presence = check_path(control_te, path.copy()) # testing this
-		control_ranking = extract_rankings(control_te, nodes)
-		control_correlation = extract_rank_correlation(true_ranking, control_ranking)
+		control_time_series = run_simuation(generator, g.copy(), r, nodes, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, False)
+		bin_control_time_series = control_time_series.copy() > 0
+		control_te = calculate_transfer_entropy(bin_control_time_series.copy(), tr)
+		#control_te = extract_TE_trees(control_te) 
+		#control_path_presence = check_path(control_te, path.copy())
+		control_ranking = extract_rankings(control_te.copy(), nodes)
+		control_correlation = extract_rank_correlation(true_ranking.copy(), control_ranking.copy())
 		control_rank_correlation[t] = control_correlation
-		control_path_detection[t] = control_path_presence # testing this
+		#control_path_detection[t] = control_path_presence
 
-	#return (test_rank_correlation, control_rank_correlation)
-	return (test_rank_correlation, test_path_detection, control_rank_correlation, control_path_detection)
+	#return (test_rank_correlation, test_path_detection, control_rank_correlation, control_path_detection)
+	return (test_rank_correlation.copy(), control_rank_correlation.copy())
 
 def save_graph(g, out_dir, name, title):
 	#print(g)
@@ -501,8 +459,8 @@ def process_ex_results(ex_results_p_value, ex_results_df, ex_results_test_mean, 
 	return (m_ex_results_p_value, m_ex_results_test_mean, m_ex_results_control_mean, m_ex_results_test_path_mean, m_ex_results_control_path_mean)
 
 def experiment_v2(out_dir, trials, max_edge_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, tr):
-	gs = [10, 100, 200, 300, 400, 500]
-	r = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] 
+	gs = [10, 100]
+	r = [0.1, 0.3, 0.5, 0.7, 0.9] 
 	if not os.path.exists(out_dir):
 		os.makedirs(out_dir)
 
@@ -510,34 +468,35 @@ def experiment_v2(out_dir, trials, max_edge_weight, rewire_probability, max_rela
 
 	for graph_size in gs:
 		rels = int(graph_size/5)
-		mew_rank_corr_results = pd.DataFrame(index=["TE Without Higher Order Relationships", "TE With Higher Order Relationships"], columns=r)
-		mew_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
+		mew_rank_corr_results = pd.DataFrame(index=["TE Without Higher Order Relationships", "TE With Higher Order Relationships"], columns=r.copy())
+		#mew_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
 
-		hos_rank_corr_results = pd.DataFrame(index=["TE Without Higher Order Relationships", "TE With Higher Order Relationships"], columns=r)
-		hos_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
+		#hos_rank_corr_results = pd.DataFrame(index=["TE Without Higher Order Relationships", "TE With Higher Order Relationships"], columns=r)
+		#hos_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
 
-		thr_rank_corr_results = pd.DataFrame(index=["TE Without Higher Order Relationships", "TE With Higher Order Relationships"], columns=r)
-		thr_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
+		#thr_rank_corr_results = pd.DataFrame(index=["TE Without Higher Order Relationships", "TE With Higher Order Relationships"], columns=r)
+		#thr_path_results = pd.DataFrame(index=["Without Higher Order Relationships", "With Higher Order Relationships"], columns=r)
 		for v in r:
 			print("Graph Size = {}, Parameter Value = {}".format(graph_size, v))
-			test_rank_correlation, test_path, control_rank_correlation, control_path = trial(rels, graph_size, trials, v, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, tr)
+			#test_rank_correlation, test_path, control_rank_correlation, control_path = trial(rels, graph_size, trials, v, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, tr)
+			test_rank_correlation, control_rank_correlation = trial(rels, graph_size, trials, v, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, tr)
 			mew_rank_corr_results.loc["TE With Higher Order Relationships", v] = np.mean(test_rank_correlation)
 			mew_rank_corr_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_rank_correlation)
-			mew_path_results.loc["TE With Higher Order Relationships",v] = np.mean(test_path)
-			mew_path_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_path)
-
+			#mew_path_results.loc["TE With Higher Order Relationships",v] = np.mean(test_path)
+			#mew_path_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_path)
+			'''
 			test_rank_correlation, test_path, control_rank_correlation, control_path = trial(rels, graph_size, trials, max_edge_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, v, inbox_cap, tr)
 			hos_rank_corr_results.loc["TE With Higher Order Relationships", v] = np.mean(test_rank_correlation)
 			hos_rank_corr_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_rank_correlation)
-			hos_path_results.loc["TE With Higher Order Relationships",v] = np.mean(test_path)
-			hos_path_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_path)
+			#hos_path_results.loc["TE With Higher Order Relationships",v] = np.mean(test_path)
+			#hos_path_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_path)
 
 			test_rank_correlation, test_path, control_rank_correlation, control_path = trial(rels, graph_size, trials, max_edge_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, v)
 			thr_rank_corr_results.loc["TE With Higher Order Relationships", v] = np.mean(test_rank_correlation)
 			thr_rank_corr_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_rank_correlation)
-			thr_path_results.loc["TE With Higher Order Relationships",v] = np.mean(test_path)
-			thr_path_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_path)
-
+			#thr_path_results.loc["TE With Higher Order Relationships",v] = np.mean(test_path)
+			#thr_path_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_path)
+			'''
 		mew_rank_corr_results.to_csv(path_or_buf=out_dir+"/Max_Edge_Weight_vs_Rank_Correlation__GS_"+str(graph_size)+".csv")	
 		f0 = mew_rank_corr_results.T.plot(title="Effect of Localizable Signal Strength on Rank Correlation, "+str(graph_size)+" Nodes", ylabel="Rank Correlation", xlabel="Localizable Influence Signal Strength")
 		plt.savefig(out_dir+"/Max_Edge_Weight_vs_Rank_Correlation__GS_"+str(graph_size)+".png")
@@ -547,26 +506,49 @@ def experiment_v2(out_dir, trials, max_edge_weight, rewire_probability, max_rela
 		#f1 = mew_path_results.T.plot(title = "Effect of Localizable Influence Signal Strength on Path Recovery", ylabel="Path Recovery", xlabel="Localizable Influence Signal Strength")
 		#plt.savefig(out_dir+"/Max_Edge_Weight_vs_Path_Recovery__GS_"+str(graph_size)+".png")
 		#plt.close()
-
+		'''
 		hos_rank_corr_results.to_csv(path_or_buf=out_dir+"/Higher_Order_Sensitivity_vs_Rank_Correlation__GS_"+str(graph_size)+".csv")
 		f2 = hos_rank_corr_results.T.plot(title="Effect of Higher Order Signal Strength on Rank Correlation, "+str(graph_size)+" Nodes", ylabel="Rank Correlation", xlabel="Higher Order Relationship Signal Strength")
 		plt.savefig(out_dir+"/Higher_Order_Sensitivity_vs_Rank_Correlation__GS_"+str(graph_size)+".png")
 		plt.close()
-		
+		'''
 		#hos_path_results.to_csv(path_or_buf=out_dir+"/Higher_Order_Sensitivity_vs_Path_Recovery__GS_"+str(graph_size)+".csv")
 		#f3 = hos_path_results.T.plot(title = "Effect of Higher Order Relationship Signal Strength on Path Recovery", ylabel="Average Path Recovery", xlabel="Higher Order Relationship Signal Strength")
 		#plt.savefig(out_dir+"/Higher_Order_Sensitivity_vs_Path_Recovery__GS_"+str(graph_size)+".png")
 		#plt.close()
-
+		'''
 		thr_rank_corr_results.to_csv(path_or_buf=out_dir+"/Threshold_vs_Rank_Correlation__GS_"+str(graph_size)+".csv")
 		f4 = thr_rank_corr_results.T.plot(title="Effect of TE Filtering Threshold on Rank Correlation, "+str(graph_size)+" Nodes", ylabel="Rank Correlation", xlabel="TE Filtering Threshold (std devs below mean)")
 		plt.savefig(out_dir+"/Threshold_vs_Rank_Correlation__GS_"+str(graph_size)+".png")
 		plt.close()
-
+		'''
 		#thr_path_results.to_csv(path_or_buf=out_dir+"/Effect of TE Filtering Threshold_on_Path Recovery__GS_"+str(graph_size)+".csv")
 		#f5 = thr_path_results.T.plot(title = "Effect of TE Filtering Threshold on Path Recovery", ylabel="Average Path Recovery", xlabel="TE Filtering Threshold (std devs below mean)")
 		#plt.savefig(out_dir+"/Threshold_vs_Path_Recovery__GS_"+str(graph_size)+".png")
 		#plt.close()
+
+def experiment_v3(out_dir, trials, max_edge_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, tr):
+	gs = [10, 100]
+	r = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+	if not os.path.exists(out_dir):
+		os.makedirs(out_dir)
+
+	sample_trial(out_dir+"/sample_trial", 2, 10, max_edge_weight, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, tr)
+
+	for graph_size in gs:
+		rels = int(graph_size/5)
+		mew_rank_corr_results = pd.DataFrame(index=["TE Without Higher Order Relationships", "TE With Higher Order Relationships"], columns=r.copy())
+
+		for v in r:
+			print("Graph Size = {}, Parameter Value = {}".format(graph_size, v))
+			test_rank_correlation, control_rank_correlation = trial(rels, graph_size, trials, v, rewire_probability, max_relationship_size, time_steps, emission_probability, higher_order_sensitivity, inbox_cap, tr)
+			mew_rank_corr_results.loc["TE With Higher Order Relationships", v] = np.mean(test_rank_correlation)
+			mew_rank_corr_results.loc["TE Without Higher Order Relationships", v] = np.mean(control_rank_correlation)
+
+		mew_rank_corr_results.to_csv(path_or_buf=out_dir+"/Max_Edge_Weight_vs_Rank_Correlation__GS_"+str(graph_size)+".csv")
+		f0 = mew_rank_corr_results.T.plot(title="Effect of Localizable Signal Strength on Rank Correlation, "+str(graph_size)+" Nodes", ylabel="Rank Correlation", xlabel="Localizable Influence Signal Strength")
+		plt.savefig(out_dir+"/Max_Edge_Weight_vs_Rank_Correlation__GS_"+str(graph_size)+".png")
+		plt.close()
 
 if __name__ == '__main__':
 	main()
